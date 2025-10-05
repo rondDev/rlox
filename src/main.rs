@@ -2,6 +2,7 @@ use std::{
     env, fs,
     io::{self, Write},
     process::exit,
+    sync::{Mutex, MutexGuard},
 };
 mod scanner;
 mod token;
@@ -9,16 +10,19 @@ mod token_type;
 
 use skan::scanner::Scanner;
 
+static LOX: Mutex<Lox> = Mutex::new(Lox { had_error: false });
+
 fn main() {
-    let mut lox = Lox { had_error: false };
     let args: Vec<String> = env::args().collect();
     if args.len() > 2 {
         println!("Usage: rlox [script]");
         exit(64);
     } else if args.len() == 2 {
-        lox.run_file(&args[1]);
+        LOX.lock().unwrap().run_file(&args[1]);
     } else {
-        lox.run_prompt()
+        LOX.lock()
+            .unwrap()
+            .run_prompt()
             .unwrap_or_else(|e| println!("Error occured trying to run run_prompt: {}", e));
     }
 }

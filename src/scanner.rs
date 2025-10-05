@@ -1,4 +1,4 @@
-use crate::{Lox, token::Token, token_type::TokenType};
+use crate::{LOX, Lox, token::Token, token_type::TokenType};
 
 struct Scanner {
     source: Vec<char>,
@@ -47,12 +47,10 @@ impl Scanner {
             '+' => self.add_token(TokenType::PLUS),
             ';' => self.add_token(TokenType::SEMICOLON),
             '*' => self.add_token(TokenType::STAR),
-            // TODO: PLEASE FIX THIS
-            _ => Lox::error(
-                &mut Lox { had_error: true },
-                self.line,
-                "Unexpected character.",
-            ),
+            _ => LOX
+                .lock()
+                .unwrap()
+                .error(self.line, "Unexpected character."),
         }
     }
     fn is_at_end(&self) -> bool {
