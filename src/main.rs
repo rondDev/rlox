@@ -3,6 +3,9 @@ use std::{
     io::{self, Write},
     process::exit,
 };
+mod scanner;
+mod token;
+mod token_type;
 
 use skan::scanner::Scanner;
 
