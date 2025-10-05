@@ -47,6 +47,21 @@ impl Scanner {
             '+' => self.add_token(TokenType::PLUS),
             ';' => self.add_token(TokenType::SEMICOLON),
             '*' => self.add_token(TokenType::STAR),
+            '!' => self.next_match('=', TokenType::BANG_EQUAL, TokenType::BANG),
+            '=' => self.next_match('=', TokenType::EQUAL_EQUAL, TokenType::EQUAL),
+            '<' => self.next_match('=', TokenType::LESS_EQUAL, TokenType::LESS),
+            '>' => self.next_match('=', TokenType::GREATER_EQUAL, TokenType::GREATER),
+            '/' => {
+                if self.source[self.current] == '/' {
+                    while self.peek() != '\n' && !self.is_at_end() {
+                        self.advance();
+                    }
+                } else {
+                    self.add_token(TokenType::SLASH);
+                }
+            }
+            ' ' | '\r' | '\t' => {}
+            '\n' => self.line += 1,
             _ => LOX
                 .lock()
                 .unwrap()
@@ -71,5 +86,24 @@ impl Scanner {
             literal: Box::from(literal),
             line: self.line,
         });
+    }
+
+    fn next_match(&mut self, matching: char, if_true: TokenType, if_false: TokenType) {
+        if self.is_at_end() {
+            return;
+        }
+        if self.source[self.current] != matching {
+            self.add_token(if_false);
+        } else {
+            self.add_token(if_true);
+        }
+        self.current += 1;
+    }
+
+    fn peek(&mut self) -> char {
+        if self.is_at_end() {
+            return '\0';
+        }
+        self.source[self.current]
     }
 }
