@@ -1,4 +1,4 @@
-- rlox
+# rlox
 My attempt at making a lox interpreter in rust (first part) from the
 [Crafting Interpreters book](https://craftinginterpreters.com/)
 
