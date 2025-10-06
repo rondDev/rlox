@@ -4,11 +4,12 @@ use std::{
     process::exit,
     sync::{Mutex, MutexGuard},
 };
+
+use crate::scanner::Scanner;
+mod expr;
 mod scanner;
 mod token;
 mod token_type;
-
-use skan::scanner::Scanner;
 
 static LOX: Mutex<Lox> = Mutex::new(Lox { had_error: false });
 
@@ -60,8 +61,9 @@ impl Lox {
 
     fn run(&self, input: &str) {
         let mut sc = Scanner::from_str(input);
-        for token in sc {
-            println!("{}", token as char);
+        sc.scan_tokens();
+        for token in sc.tokens {
+            println!("{}", token);
         }
     }
 
