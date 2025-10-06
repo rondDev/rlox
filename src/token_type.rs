@@ -1,5 +1,5 @@
 #[allow(non_camel_case_types, clippy::upper_case_acronyms)]
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum TokenType {
     LEFT_PAREN,
     RIGHT_PAREN,
