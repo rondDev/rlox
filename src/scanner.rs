@@ -128,4 +128,39 @@ impl Scanner {
             LiteralType::String(val.iter().collect::<String>()),
         );
     }
+
+    fn number(&mut self) {
+        while self.peek().is_ascii_digit() {
+            self.advance();
+        }
+        let mut is_float = false;
+
+        if self.peek() == '.' && self.peek_next().is_ascii_digit() {
+            is_float = true;
+            self.advance();
+
+            while self.peek().is_ascii_digit() {
+                self.advance();
+            }
+        }
+
+        println!("Is float? {}", is_float);
+        let out = if !is_float {
+            self.source[self.start..self.current]
+                .iter()
+                .collect::<String>()
+                .trim()
+                .parse::<u64>()
+                .unwrap() as f64
+        } else {
+            self.source[self.start..self.current]
+                .iter()
+                .collect::<String>()
+                .trim()
+                .parse()
+                .expect("Failed to parse float")
+        };
+
+        self.add_token_literal(TokenType::NUMBER, LiteralType::Number(out));
+    }
 }
