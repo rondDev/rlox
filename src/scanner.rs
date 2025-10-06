@@ -106,4 +106,26 @@ impl Scanner {
         }
         self.source[self.current]
     }
+
+    fn string(&mut self) {
+        while self.peek() != '"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.advance();
+        }
+
+        if self.is_at_end() {
+            LOX.lock().unwrap().error(self.line, "Unterminated string");
+            return;
+        }
+
+        self.advance();
+
+        let val = &self.source[self.start + 1..self.current - 1];
+        self.add_token_literal(
+            TokenType::STRING,
+            LiteralType::String(val.iter().collect::<String>()),
+        );
+    }
 }
