@@ -1,8 +1,38 @@
-use crate::{LOX, Lox, token::Token, token_type::TokenType};
+use std::collections::HashMap;
 
-struct Scanner {
+use crate::{
+    LOX, Lox,
+    token::{LiteralType, Token},
+    token_type::TokenType,
+};
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref KEYWORDS: HashMap<&'static str, TokenType> = {
+        let mut h = HashMap::new();
+        h.insert("and", TokenType::AND);
+        h.insert("class", TokenType::AND);
+        h.insert("else", TokenType::AND);
+        h.insert("false", TokenType::AND);
+        h.insert("for", TokenType::AND);
+        h.insert("fun", TokenType::AND);
+        h.insert("if", TokenType::AND);
+        h.insert("nil", TokenType::AND);
+        h.insert("or", TokenType::AND);
+        h.insert("print", TokenType::AND);
+        h.insert("return", TokenType::AND);
+        h.insert("super", TokenType::AND);
+        h.insert("this", TokenType::AND);
+        h.insert("true", TokenType::AND);
+        h.insert("var", TokenType::AND);
+        h.insert("while", TokenType::AND);
+        h
+    };
+}
+
+pub struct Scanner {
     source: Vec<char>,
-    tokens: Vec<Token>,
+    pub tokens: Vec<Token>,
     start: usize,
     current: usize,
     line: usize,
@@ -21,7 +51,13 @@ impl Default for Scanner {
 }
 
 impl Scanner {
-    fn scan_tokens(&mut self) {
+    pub fn from_str(input: &str) -> Self {
+        Self {
+            source: input.chars().collect(),
+            ..Default::default()
+        }
+    }
+    pub fn scan_tokens(&mut self) {
         while !self.is_at_end() {
             self.start = self.current;
             self.scan_token();
@@ -30,7 +66,7 @@ impl Scanner {
         self.tokens.push(Token::new(
             TokenType::EOF,
             String::from(""),
-            Box::<Option<String>>::from(None),
+            LiteralType::Option(),
             self.line,
         ));
     }
@@ -62,10 +98,17 @@ impl Scanner {
             }
             ' ' | '\r' | '\t' => {}
             '\n' => self.line += 1,
-            _ => LOX
-                .lock()
-                .unwrap()
-                .error(self.line, "Unexpected character."),
+            '"' => self.string(),
+            '0'..='9' => self.number(),
+            _ => {
+                if c.is_alphanumeric() {
+                    self.identifier();
+                } else {
+                    LOX.lock()
+                        .unwrap()
+                        .error(self.line, "Unexpected character.")
+                }
+            }
         }
     }
     fn is_at_end(&self) -> bool {
@@ -77,13 +120,13 @@ impl Scanner {
         self.source[self.current]
     }
     fn add_token(&mut self, token: TokenType) {
-        self.add_token_literal(token, None);
+        self.add_token_literal(token, LiteralType::Option());
     }
-    fn add_token_literal(&mut self, token: TokenType, literal: Option<String>) {
+    fn add_token_literal(&mut self, token: TokenType, literal: LiteralType) {
         self.tokens.push(Token {
             token_type: token,
             lexeme: self.source[self.start..self.current].iter().collect(),
-            literal: Box::from(literal),
+            literal,
             line: self.line,
         });
     }
